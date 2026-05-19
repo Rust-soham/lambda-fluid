@@ -1,0 +1,21 @@
+{
+  "lineWidth": 100,
+  "indentWidth": 2,
+  "useTabs": false,
+  "newLineKind": "lf",
+  "plugins": [
+    "https://plugins.dprint.dev/typescript-x.x.x.wasm",
+    "https://plugins.dprint.dev/json-x.x.x.wasm",
+    "https://plugins.dprint.dev/markdown-x.x.x.wasm"
+  ],
+  "typescript": {
+    "quoteStyle": "preferDouble",
+    "semiColons": "asi"
+  },
+  "json": {
+    "indentWidth": 2
+  },
+  "markdown": {
+    "lineWidth": 100
+  }
+}

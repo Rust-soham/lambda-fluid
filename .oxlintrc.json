@@ -1,0 +1,37 @@
+{
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "build",
+    ".turbo"
+  ],
+  "plugins": {
+    "import": true,
+    "node": true,
+    "typescript": true,
+    "unicorn": true,
+    "promise": true
+  },
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "pedantic": "warn",
+    "perf": "warn",
+    "style": "warn"
+  },
+  "rules": {
+    "eqeqeq": "error",
+    "no-debugger": "error",
+    "no-console": "warn",
+    "no-unused-vars": "warn",
+    "prefer-const": "warn",
+    "import/no-unresolved": "error",
+    "import/no-duplicates": "warn",
+    "node/no-unsupported-features/es-syntax": "error"
+  },
+  "globals": {
+    "console": "readonly",
+    "process": "readonly",
+    "Buffer": "readonly"
+  }
+}
