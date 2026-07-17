@@ -1,0 +1,26 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "deploy": {
+      "cache": false
+    },
+    "destroy": {
+      "cache": false
+    },
+    "login": {
+      "cache": false,
+      "interactive": true
+    },
+    "profile": {
+      "cache": false
+    },
+    "plan": {
+      "cache": false
+    }
+  }
+}

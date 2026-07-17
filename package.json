@@ -1,9 +1,18 @@
 {
   "name": "lambda-fluid",
   "version": "1.0.0",
+  "private": true,
   "description": "",
   "main": "index.js",
   "scripts": {
+    "infra:dev": "turbo run dev -F @lambda-fluid/infra --",
+    "infra:deploy": "turbo run deploy -F @lambda-fluid/infra --",
+    "infra:destroy": "turbo run destroy -F @lambda-fluid/infra --",
+    "infra:login": "turbo run login -F @lambda-fluid/infra --",
+    "infra:profile": "turbo run profile -F @lambda-fluid/infra --",
+    "infra:plan": "turbo run plan -F @lambda-fluid/infra --",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "lint": "oxlint . --deny-warnings --import-plugin --node-plugin",
     "lint:fix": "oxlint . --fix --import-plugin --node-plugin"
   },
@@ -11,15 +20,17 @@
   "author": "",
   "license": "ISC",
   "type": "module",
+  "packageManager": "pnpm@11.1.0",
   "dependencies": {
     "@effect/platform-node": "4.0.0-beta.68",
-    "alchemy": "2.0.0-beta.40",
     "effect": "4.0.0-beta.68",
     "tsx": "^4.22.1",
     "typescript": "^6.0.3"
   },
   "devDependencies": {
     "@types/node": "^25.9.0",
-    "oxlint": "^1.66.0"
+    "oxfmt": "^0.51.0",
+    "oxlint": "^1.66.0",
+    "turbo": "^2.9.14"
   }
 }

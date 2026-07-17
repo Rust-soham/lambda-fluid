@@ -1,9 +1,9 @@
 {
   "recommendations": [
-    "dprint.dprint",
-    "oxc.oxlint"
+    "oxc.oxc-vscode"
   ],
   "unwantedRecommendations": [
-    "esbenp.prettier-vscode"
+    "esbenp.prettier-vscode",
+    "dprint.dprint"
   ]
 }
