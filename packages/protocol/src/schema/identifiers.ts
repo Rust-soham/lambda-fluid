@@ -1,4 +1,4 @@
-import { Schema as S } from "effect";
+import * as S from "effect/Schema";
 
 export const RequestId = S.NonEmptyString.pipe(S.brand("RequestId"));
 export type RequestId = typeof RequestId.Type;

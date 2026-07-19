@@ -1,6 +1,6 @@
 import { Data, Effect, Schema } from "effect";
 
-Effect.logInfo("hoe hoe").pipe(Effect.runPromise);
+Effect.runFork(Effect.logInfo("hoe hoe"));
 
 export class InvalidSession extends Data.TaggedError("InvalidSession")<{
   token: string;

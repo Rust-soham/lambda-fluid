@@ -20,5 +20,5 @@ export default Alchemy.Stack(
     });
 
     return { lambda };
-  }),
+  })
 );

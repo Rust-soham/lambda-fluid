@@ -42,7 +42,7 @@ export class WorkerTransitionError extends S.TaggedErrorClass<WorkerTransitionEr
 export type TransitionResult = Result.Result<WorkerState, WorkerTransitionError>;
 
 const failure = (reason: WorkerTransitionFailure): TransitionResult =>
-  Result.fail(new WorkerTransitionError({ reason }));
+  Result.fail(WorkerTransitionError.make({ reason }));
 
 export const makeWorkerState = (
   registration: WorkerRegistration,

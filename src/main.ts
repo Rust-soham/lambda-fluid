@@ -13,4 +13,4 @@ const program = Console.log("hi");
 
 const program2 = Console.log("bye");
 
-Effect.all([program, program2]).pipe(Effect.runPromise);
+Effect.runFork(Effect.all([program, program2]));

@@ -8,7 +8,5 @@ export default Alchemy.Stack(
     providers: AWS.providers(),
     state: Alchemy.localState(),
   },
-  Effect.gen(function* () {
-    return {};
-  }),
+  Effect.succeed({})
 );

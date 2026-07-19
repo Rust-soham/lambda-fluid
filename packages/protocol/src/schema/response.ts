@@ -1,34 +1,43 @@
-import { Schema as S } from "effect";
+import * as S from "effect/Schema";
 
 import { NonNegativeInt } from "./base.js";
 import { HttpStatusCode, RequestId, WorkerId } from "./identifiers.js";
 
-export const ResponseFrame = S.TaggedUnion({
-  ResponseStarted: {
-    requestId: RequestId,
-    workerId: WorkerId,
-    statusCode: HttpStatusCode,
-    startedAtEpochMs: NonNegativeInt,
-  },
-  ResponseBodyChunk: {
-    requestId: RequestId,
-    sequence: NonNegativeInt,
-    body: S.String,
-  },
-  ResponseEnd: {
-    requestId: RequestId,
-    completedAtEpochMs: NonNegativeInt,
-    totalChunks: NonNegativeInt,
-  },
-});
+export class ResponseStarted 
+  extends S.TaggedClass<ResponseStarted>()(
+    "ResponseStarted",
+    {
+      requestId: RequestId,
+      workerId: WorkerId,
+      statusCode: HttpStatusCode,
+      startedAtEpochMs: NonNegativeInt,
+    }
+) {}
+
+export class ResponseBodyChunk 
+  extends S.TaggedClass<ResponseBodyChunk>()(
+    "ResponseBodyChunk",
+    {
+      requestId: RequestId,
+      sequence: NonNegativeInt,
+      body: S.String,
+    }
+) {}
+
+export class ResponseEnd 
+  extends S.TaggedClass<ResponseEnd>()(
+    "ResponseEnd", 
+    {
+      requestId: RequestId,
+      completedAtEpochMs: NonNegativeInt,
+      totalChunks: NonNegativeInt,
+    }
+) {}
+
+export const ResponseFrame = S.Union([
+  ResponseStarted,
+  ResponseBodyChunk,
+  ResponseEnd,
+]).pipe(S.toTaggedUnion("_tag"));
 
 export type ResponseFrame = typeof ResponseFrame.Type;
-
-export const ResponseStarted = ResponseFrame.cases.ResponseStarted;
-export type ResponseStarted = typeof ResponseStarted.Type;
-
-export const ResponseBodyChunk = ResponseFrame.cases.ResponseBodyChunk;
-export type ResponseBodyChunk = typeof ResponseBodyChunk.Type;
-
-export const ResponseEnd = ResponseFrame.cases.ResponseEnd;
-export type ResponseEnd = typeof ResponseEnd.Type;

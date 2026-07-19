@@ -11,12 +11,11 @@
     "plan": "node ./scripts/alchemy-aws.mjs plan"
   },
   "dependencies": {
-    "@effect/platform-node": "4.0.0-beta.68",
-    "alchemy": "2.0.0-beta.40",
-    "effect": "4.0.0-beta.68"
+    "@effect/platform-node": "4.0.0-beta.98",
+    "alchemy": "2.0.0-beta.63",
+    "effect": "4.0.0-beta.98"
   },
   "devDependencies": {
-    "@types/node": "^25.9.0",
-    "typescript": "^6.0.3"
+    "@types/node": "^25.9.0"
   }
 }

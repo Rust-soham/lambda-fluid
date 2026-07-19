@@ -1,4 +1,4 @@
-import { Schema as S } from "effect";
+import * as S from "effect/Schema";
 
 import { NonNegativeInt, PositiveInt, ProtocolVersion } from "./base.js";
 import { DeploymentId, RequestId, WorkerId } from "./identifiers.js";
@@ -14,53 +14,59 @@ export const JobNackReason = S.Literals([
 ]);
 export type JobNackReason = typeof JobNackReason.Type;
 
-export const WorkerFrame = S.TaggedUnion({
-  WorkerRegistration: {
-    protocolVersion: ProtocolVersion,
-    workerId: WorkerId,
-    deploymentId: DeploymentId,
-    maxConcurrency: PositiveInt,
-    connectionGeneration: PositiveInt,
-  },
-  WorkerHealthSnapshot: {
-    workerId: WorkerId,
-    connectionGeneration: PositiveInt,
-    snapshotSequence: NonNegativeInt,
-    sampledAtEpochMs: NonNegativeInt,
-    inFlight: NonNegativeInt,
-    cpuUsedMicros: NonNegativeInt,
-    sampleIntervalMicros: PositiveInt,
-    rssBytes: NonNegativeInt,
-    heapUsedBytes: NonNegativeInt,
-    memoryLimitBytes: PositiveInt,
-    eventLoopLagMicros: NonNegativeInt,
-    draining: S.Boolean,
-  },
-  JobAccepted: {
+export class WorkerRegistration 
+  extends S.TaggedClass<WorkerRegistration>()(
+    "WorkerRegistration",
+    {
+      protocolVersion: ProtocolVersion,
+      workerId: WorkerId,
+      deploymentId: DeploymentId,
+      maxConcurrency: PositiveInt,
+      connectionGeneration: PositiveInt,
+    }
+) {}
+
+export class WorkerHealthSnapshot 
+  extends S.TaggedClass<WorkerHealthSnapshot>()(
+    "WorkerHealthSnapshot",
+    {
+      workerId: WorkerId,
+      connectionGeneration: PositiveInt,
+      snapshotSequence: NonNegativeInt,
+      sampledAtEpochMs: NonNegativeInt,
+      inFlight: NonNegativeInt,
+      cpuUsedMicros: NonNegativeInt,
+      sampleIntervalMicros: PositiveInt,
+      rssBytes: NonNegativeInt,
+      heapUsedBytes: NonNegativeInt,
+      memoryLimitBytes: PositiveInt,
+      eventLoopLagMicros: NonNegativeInt,
+      draining: S.Boolean,
+    }
+) {}
+
+export class JobAccepted 
+  extends S.TaggedClass<JobAccepted>()("JobAccepted", {
     requestId: RequestId,
     workerId: WorkerId,
     connectionGeneration: PositiveInt,
     acceptedAtEpochMs: NonNegativeInt,
-  },
-  JobNack: {
+}) {}
+
+export class JobNack 
+  extends S.TaggedClass<JobNack>()("JobNack", {
     requestId: RequestId,
     workerId: WorkerId,
     connectionGeneration: PositiveInt,
     reason: JobNackReason,
     nackedAtEpochMs: NonNegativeInt,
-  },
-});
+}) {}
+
+export const WorkerFrame = S.Union([
+  WorkerRegistration,
+  WorkerHealthSnapshot,
+  JobAccepted,
+  JobNack,
+]).pipe(S.toTaggedUnion("_tag"));
 
 export type WorkerFrame = typeof WorkerFrame.Type;
-
-export const WorkerRegistration = WorkerFrame.cases.WorkerRegistration;
-export type WorkerRegistration = typeof WorkerRegistration.Type;
-
-export const WorkerHealthSnapshot = WorkerFrame.cases.WorkerHealthSnapshot;
-export type WorkerHealthSnapshot = typeof WorkerHealthSnapshot.Type;
-
-export const JobAccepted = WorkerFrame.cases.JobAccepted;
-export type JobAccepted = typeof JobAccepted.Type;
-
-export const JobNack = WorkerFrame.cases.JobNack;
-export type JobNack = typeof JobNack.Type;

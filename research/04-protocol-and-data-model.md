@@ -126,7 +126,7 @@ Implementation rules:
 - keep envelope framing errors separate from payload schema errors;
 - version the protocol from the first frame.
 
-Exact API spelling must follow Effect `4.0.0-beta.68` installed in this repo.
+Exact API spelling must follow Effect `4.0.0-beta.98` installed in this repo.
 The transcript's `ServiceMap.Service` examples are not current for this
 workspace.
 

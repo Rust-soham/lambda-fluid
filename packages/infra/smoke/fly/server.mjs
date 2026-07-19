@@ -9,7 +9,7 @@ const server = http.createServer((request, response) => {
       message: "lambda-fluid Fly.io smoke test passed",
       path: request.url,
       checkedAt: new Date().toISOString(),
-    }),
+    })
   );
 });
 

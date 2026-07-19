@@ -1,4 +1,4 @@
-import { Schema as S } from "effect";
+import * as S from "effect/Schema";
 
 export const NonNegativeInt = S.Int.check(S.isGreaterThanOrEqualTo(0));
 

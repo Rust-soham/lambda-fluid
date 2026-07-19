@@ -13,17 +13,11 @@ if (!command) {
 const profileIndex = args.findIndex((arg) => arg === "--profile");
 const profile =
   profileIndex >= 0 && args[profileIndex + 1] ? args[profileIndex + 1] : "default";
-const credentialsPath = join(
-  homedir(),
-  ".alchemy",
-  "credentials",
-  profile,
-  "aws.json",
-);
+const credentialsPath = join(homedir(), ".alchemy", "credentials", profile, "aws.json");
 
 if (!existsSync(credentialsPath)) {
   console.error(
-    `Alchemy AWS credentials for profile '${profile}' were not found. Run: pnpm infra:login --profile ${profile}`,
+    `Alchemy AWS credentials for profile '${profile}' were not found. Run: pnpm infra:login --profile ${profile}`
   );
   process.exit(1);
 }
@@ -45,7 +39,7 @@ if (!env.AWS_ACCOUNT_ID) {
   const identity = spawnSync(
     "aws",
     ["sts", "get-caller-identity", "--output", "json"],
-    { encoding: "utf8", env },
+    { encoding: "utf8", env }
   );
 
   if (identity.status !== 0) {

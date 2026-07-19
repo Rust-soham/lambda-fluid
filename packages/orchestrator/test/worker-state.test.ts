@@ -1,5 +1,4 @@
-import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { assert, describe, it } from "@effect/vitest";
 
 import {
   DeploymentId,
@@ -54,29 +53,31 @@ const snapshot = (
   });
 
 const success = (result: TransitionResult): WorkerState => {
-  assert(Result.isSuccess(result));
+  if (Result.isFailure(result)) {
+    assert.fail(`Expected transition success, received ${result.failure.reason}`);
+  }
   return result.success;
 };
 
 describe("worker admission state", () => {
   it("tracks reservations over a stale worker snapshot", () => {
     let state = success(makeWorkerState(registration, snapshot()));
-    assert.equal(effectiveLoad(state), 7);
+    assert.strictEqual(effectiveLoad(state), 7);
 
     state = success(reserve(state, requestA, 1_100));
     state = success(reserve(state, requestB, 1_101));
-    assert.equal(effectiveLoad(state), 9);
+    assert.strictEqual(effectiveLoad(state), 9);
 
     state = success(accept(state, requestA, 1_102));
     state = success(release(state, requestB));
-    assert.equal(effectiveLoad(state), 8);
+    assert.strictEqual(effectiveLoad(state), 8);
   });
 
   it("reconciles an accepted assignment with a newer snapshot", () => {
     let state = success(makeWorkerState(registration, snapshot()));
     state = success(reserve(state, requestA, 1_100));
     state = success(accept(state, requestA, 1_102));
-    assert.equal(effectiveLoad(state), 8);
+    assert.strictEqual(effectiveLoad(state), 8);
 
     state = success(
       applySnapshot(
@@ -89,8 +90,8 @@ describe("worker admission state", () => {
       )
     );
 
-    assert.equal(state.assignments.size, 0);
-    assert.equal(effectiveLoad(state), 8);
+    assert.strictEqual(state.assignments.size, 0);
+    assert.strictEqual(effectiveLoad(state), 8);
   });
 
   it("rejects stale snapshots and prevents over-reservation", () => {
@@ -101,12 +102,16 @@ describe("worker admission state", () => {
     state = success(reserve(state, requestA, 1_100));
 
     const atCapacity = reserve(state, requestB, 1_101);
-    assert(Result.isFailure(atCapacity));
-    assert.equal(atCapacity.failure.reason, "AtCapacity");
+    if (Result.isSuccess(atCapacity)) {
+      assert.fail("Expected reservation to fail at capacity");
+    }
+    assert.strictEqual(atCapacity.failure.reason, "AtCapacity");
 
     const stale = applySnapshot(state, snapshot({ snapshotSequence: 1, inFlight: 1 }));
-    assert(Result.isFailure(stale));
-    assert.equal(stale.failure.reason, "StaleSnapshot");
-    assert.equal(effectiveLoad(state), 10);
+    if (Result.isSuccess(stale)) {
+      assert.fail("Expected stale snapshot to fail");
+    }
+    assert.strictEqual(stale.failure.reason, "StaleSnapshot");
+    assert.strictEqual(effectiveLoad(state), 10);
   });
 });

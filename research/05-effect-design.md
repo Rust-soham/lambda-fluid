@@ -15,19 +15,19 @@ orchestrator lifecycles explicit:
 
 ## Canonical Primitive Map
 
-| Primitive | Responsibility |
-| --- | --- |
-| `Schema` | protocol, config, benchmark artifact validation |
-| `Context.Service` | service contracts in the installed Effect beta |
-| `Layer` | local, test, and AWS composition |
-| `Ref` | registry snapshots, health, counters, worker state |
-| `Deferred` | one client request waiting for one remote terminal frame |
-| `Queue` | bounded admission and serialized socket writes |
-| `Semaphore` | in-worker request limit and drain completion |
-| `Effect.fork` | supervised request and subsystem fibers |
-| `Scope` / `acquireRelease` | connection and server ownership |
-| `Schedule` | reconnect, heartbeat, health sample, idle decision |
-| timeout/race | request deadline and drain deadline |
+| Primitive                  | Responsibility                                           |
+| -------------------------- | -------------------------------------------------------- |
+| `Schema`                   | protocol, config, benchmark artifact validation          |
+| `Context.Service`          | service contracts in the installed Effect beta           |
+| `Layer`                    | local, test, and AWS composition                         |
+| `Ref`                      | registry snapshots, health, counters, worker state       |
+| `Deferred`                 | one client request waiting for one remote terminal frame |
+| `Queue`                    | bounded admission and serialized socket writes           |
+| `Semaphore`                | in-worker request limit and drain completion             |
+| `Effect.fork`              | supervised request and subsystem fibers                  |
+| `Scope` / `acquireRelease` | connection and server ownership                          |
+| `Schedule`                 | reconnect, heartbeat, health sample, idle decision       |
+| timeout/race               | request deadline and drain deadline                      |
 
 ## Fiber Rules
 
@@ -72,7 +72,7 @@ reconnect generation, scaling decision, idle retirement, and benchmark totals.
 
 ## Current API Constraint
 
-This repository currently uses Effect `4.0.0-beta.68`. The transcript snippets
+This repository currently uses Effect `4.0.0-beta.98`. The transcript snippets
 span earlier prerelease APIs and are not source code. Follow installed types:
 
 - `Context.Service` for service declarations;

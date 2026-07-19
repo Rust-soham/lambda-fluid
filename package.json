@@ -3,34 +3,35 @@
   "version": "1.0.0",
   "private": true,
   "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "infra:dev": "turbo run dev -F @lambda-fluid/infra --",
-    "infra:deploy": "turbo run deploy -F @lambda-fluid/infra --",
-    "infra:destroy": "turbo run destroy -F @lambda-fluid/infra --",
-    "infra:login": "turbo run login -F @lambda-fluid/infra --",
-    "infra:profile": "turbo run profile -F @lambda-fluid/infra --",
-    "infra:plan": "turbo run plan -F @lambda-fluid/infra --",
-    "format": "oxfmt",
-    "format:check": "oxfmt --check",
-    "lint": "oxlint . --deny-warnings --import-plugin --node-plugin",
-    "lint:fix": "oxlint . --fix --import-plugin --node-plugin"
+    "infra:dev": "vp run @lambda-fluid/infra#dev --",
+    "infra:deploy": "vp run @lambda-fluid/infra#deploy --",
+    "infra:destroy": "vp run @lambda-fluid/infra#destroy --",
+    "infra:login": "vp run @lambda-fluid/infra#login --",
+    "infra:profile": "vp run @lambda-fluid/infra#profile --",
+    "infra:plan": "vp run @lambda-fluid/infra#plan --",
+    "prepare": "./scripts/prepare-effect.sh",
+    "check": "vp check",
+    "test": "vp test run",
+    "format": "vp fmt",
+    "format:check": "vp fmt --check",
+    "lint": "vp lint",
+    "lint:fix": "vp lint --fix"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "packageManager": "pnpm@11.1.0",
   "dependencies": {
-    "@effect/platform-node": "4.0.0-beta.68",
-    "effect": "4.0.0-beta.68",
-    "tsx": "^4.22.1",
-    "typescript": "^6.0.3"
+    "@effect/platform-node": "4.0.0-beta.98",
+    "effect": "4.0.0-beta.98"
   },
   "devDependencies": {
     "@types/node": "^25.9.0",
-    "oxfmt": "^0.51.0",
-    "oxlint": "^1.66.0",
-    "turbo": "^2.9.14"
-  }
+    "@voidzero-dev/vite-plus-core": "0.2.5",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "packageManager": "pnpm@11.1.0"
 }
