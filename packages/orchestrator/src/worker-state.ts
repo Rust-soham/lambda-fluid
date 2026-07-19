@@ -34,15 +34,22 @@ export const WorkerTransitionFailure = S.Literals([
 ]);
 export type WorkerTransitionFailure = typeof WorkerTransitionFailure.Type;
 
-export class WorkerTransitionError extends S.TaggedErrorClass<WorkerTransitionError>()(
-  "Orchestrator.WorkerTransitionError",
-  { reason: WorkerTransitionFailure }
+export class WorkerTransitionError 
+  extends S.TaggedErrorClass<WorkerTransitionError>()(
+    "Orchestrator.WorkerTransitionError",
+    { 
+      reason: WorkerTransitionFailure 
+    }
 ) {}
 
 export type TransitionResult = Result.Result<WorkerState, WorkerTransitionError>;
 
+
+
 const failure = (reason: WorkerTransitionFailure): TransitionResult =>
   Result.fail(WorkerTransitionError.make({ reason }));
+
+
 
 export const makeWorkerState = (
   registration: WorkerRegistration,
@@ -65,6 +72,7 @@ export const makeWorkerState = (
   });
 };
 
+
 const overlaysSnapshot = (assignment: Assignment, sampledAtEpochMs: number): boolean =>
   Assignment.$match(assignment, {
     Reserved: () => true,
@@ -82,6 +90,7 @@ export const effectiveLoad = (state: WorkerState): number => {
 
   return state.snapshot.inFlight + overlay;
 };
+
 
 export const reserve = (
   state: WorkerState,
@@ -103,6 +112,7 @@ export const reserve = (
   return Result.succeed({ ...state, assignments });
 };
 
+
 export const accept = (
   state: WorkerState,
   requestId: RequestId,
@@ -118,6 +128,7 @@ export const accept = (
   return Result.succeed({ ...state, assignments });
 };
 
+
 export const release = (state: WorkerState, requestId: RequestId): TransitionResult => {
   if (!state.assignments.has(requestId)) {
     return failure("ReservationMissing");
@@ -127,6 +138,7 @@ export const release = (state: WorkerState, requestId: RequestId): TransitionRes
   assignments.delete(requestId);
   return Result.succeed({ ...state, assignments });
 };
+
 
 export const applySnapshot = (
   state: WorkerState,
