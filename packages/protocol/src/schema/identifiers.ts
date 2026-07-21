@@ -3,6 +3,9 @@ import * as S from "effect/Schema";
 export const RequestId = S.NonEmptyString.pipe(S.brand("RequestId"));
 export type RequestId = typeof RequestId.Type;
 
+export const AttemptId = S.NonEmptyString.pipe(S.brand("AttemptId"));
+export type AttemptId = typeof AttemptId.Type;
+
 export const WorkerId = S.NonEmptyString.pipe(S.brand("WorkerId"));
 export type WorkerId = typeof WorkerId.Type;
 

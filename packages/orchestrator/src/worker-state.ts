@@ -1,4 +1,6 @@
 import type {
+  JobNackReason,
+  AttemptId,
   RequestId,
   WorkerHealthSnapshot,
   WorkerId,
@@ -10,18 +12,36 @@ import * as S from "effect/Schema";
 
 // Tracks work the orchestrator has sent since the worker's last health snapshot.
 export type Assignment = Data.TaggedEnum<{
-  Reserved: { readonly reservedAtEpochMs: number };
-  Accepted: { readonly acceptedAtEpochMs: number };
+  Reserved: {
+    readonly attemptId: AttemptId;
+    readonly reservedAtEpochMs: number;
+  };
+  Accepted: {
+    readonly attemptId: AttemptId;
+    readonly acceptedAtEpochMs: number;
+  };
 }>;
 
 export const Assignment = Data.taggedEnum<Assignment>();
+
+// Keeps the worker's learned limit together with whether routing may use it.
+export type AdmissionControl = Data.TaggedEnum<{
+  Eligible: { readonly limit: number };
+  Suppressed: {
+    readonly limit: number;
+    readonly reason: Exclude<JobNackReason, "Internal">;
+    readonly suppressedAtSnapshotSequence: number;
+  };
+}>;
+
+export const AdmissionControl = Data.taggedEnum<AdmissionControl>();
 
 // Combines the worker's last report with newer orchestrator-owned reservations.
 export interface WorkerState {
   readonly workerId: WorkerId;
   readonly connectionGeneration: number;
   readonly maxConcurrency: number;
-  readonly admissionLimit: number;
+  readonly admission: AdmissionControl;
   readonly snapshot: WorkerHealthSnapshot;
   readonly assignments: ReadonlyMap<RequestId, Assignment>;
 }
@@ -45,7 +65,9 @@ export const WorkerTransitionFailure = S.Literals([
   "Draining",
   "DuplicateRequest",
   "ReservationMissing",
+  "Suppressed",
   "StaleConnection",
+  "StaleAttempt",
   "StaleSnapshot",
   "WorkerMismatch",
 ]);
@@ -81,10 +103,22 @@ export const makeWorkerState = (
     workerId: registration.workerId,
     connectionGeneration: registration.connectionGeneration,
     maxConcurrency: registration.maxConcurrency,
-    admissionLimit: Math.min(
-      registration.maxConcurrency,
-      Math.max(1, snapshot.inFlight + 1)
-    ),
+    admission:
+      snapshot.admissionState === "Draining"
+        ? AdmissionControl.Suppressed({
+            limit: Math.min(
+              registration.maxConcurrency,
+              Math.max(1, snapshot.inFlight + 1)
+            ),
+            reason: "Draining",
+            suppressedAtSnapshotSequence: snapshot.snapshotSequence,
+          })
+        : AdmissionControl.Eligible({
+            limit: Math.min(
+              registration.maxConcurrency,
+              Math.max(1, snapshot.inFlight + 1)
+            ),
+          }),
     snapshot,
     assignments: new Map(),
   });
@@ -110,47 +144,90 @@ export const effectiveLoad = (state: WorkerState): number => {
   return state.snapshot.inFlight + overlay;
 };
 
+// Exposes the learned limit without allowing callers to ignore eligibility.
+export const admissionLimit = (state: WorkerState): number => state.admission.limit;
+
+export const isEligible = (state: WorkerState): boolean =>
+  AdmissionControl.$is("Eligible")(state.admission);
+
 // Claims one admission slot before the job is written to the worker tunnel.
 export const reserve = (
   state: WorkerState,
   requestId: RequestId,
+  attemptId: AttemptId,
   reservedAtEpochMs: number
 ): TransitionResult => {
-  if (state.snapshot.admissionState === "Draining") {
-    return failure("Draining");
+  if (AdmissionControl.$is("Suppressed")(state.admission)) {
+    return failure(state.admission.reason === "Draining" ? "Draining" : "Suppressed");
   }
   if (state.assignments.has(requestId)) {
     return failure("DuplicateRequest");
   }
-  if (effectiveLoad(state) >= state.admissionLimit) {
+  if (effectiveLoad(state) >= state.admission.limit) {
     return failure("AtCapacity");
   }
 
   const assignments = new Map(state.assignments);
-  assignments.set(requestId, Assignment.Reserved({ reservedAtEpochMs }));
+  assignments.set(requestId, Assignment.Reserved({ attemptId, reservedAtEpochMs }));
   return Result.succeed({ ...state, assignments });
+};
+
+// Makes fresher worker evidence authoritative over the last routable snapshot.
+export const suppress = (
+  state: WorkerState,
+  reason: Exclude<JobNackReason, "Internal">
+): WorkerState => {
+  // Several requests may nack concurrently from the same reported state.
+  // One snapshot is allowed to reduce the learned limit only once.
+  if (
+    AdmissionControl.$is("Suppressed")(state.admission) &&
+    state.admission.suppressedAtSnapshotSequence === state.snapshot.snapshotSequence
+  ) {
+    return state;
+  }
+
+  return {
+    ...state,
+    admission: AdmissionControl.Suppressed({
+      limit: Math.max(1, Math.floor(state.admission.limit / 2)),
+      reason,
+      suppressedAtSnapshotSequence: state.snapshot.snapshotSequence,
+    }),
+  };
 };
 
 // Replaces a reservation with the worker's acknowledgement of the job.
 export const accept = (
   state: WorkerState,
   requestId: RequestId,
+  attemptId: AttemptId,
   acceptedAtEpochMs: number
 ): TransitionResult => {
   const assignment = state.assignments.get(requestId);
   if (assignment === undefined || !Assignment.$is("Reserved")(assignment)) {
     return failure("ReservationMissing");
   }
+  if (assignment.attemptId !== attemptId) {
+    return failure("StaleAttempt");
+  }
 
   const assignments = new Map(state.assignments);
-  assignments.set(requestId, Assignment.Accepted({ acceptedAtEpochMs }));
+  assignments.set(requestId, Assignment.Accepted({ attemptId, acceptedAtEpochMs }));
   return Result.succeed({ ...state, assignments });
 };
 
 // Removes a reservation or accepted assignment after nack, completion, or cancellation.
-export const release = (state: WorkerState, requestId: RequestId): TransitionResult => {
-  if (!state.assignments.has(requestId)) {
+export const release = (
+  state: WorkerState,
+  requestId: RequestId,
+  attemptId: AttemptId
+): TransitionResult => {
+  const assignment = state.assignments.get(requestId);
+  if (assignment === undefined) {
     return failure("ReservationMissing");
+  }
+  if (assignment.attemptId !== attemptId) {
+    return failure("StaleAttempt");
   }
 
   const assignments = new Map(state.assignments);
@@ -187,17 +264,50 @@ export const applySnapshot = (
 
   const cpuPressure = snapshot.cpuUsedMicros / snapshot.sampleIntervalMicros;
   const memoryPressure = snapshot.rssBytes / snapshot.memoryLimitBytes;
-  const isUnderPressure =
-    cpuPressure >= policy.cpuPressureRatio ||
-    memoryPressure >= policy.memoryPressureRatio ||
-    snapshot.eventLoopLagMicros >= policy.eventLoopLagMicros;
+  const pressureReason:
+    | Exclude<JobNackReason, "Internal" | "AtCapacity" | "Draining">
+    | undefined =
+    cpuPressure >= policy.cpuPressureRatio
+      ? "HighCpu"
+      : memoryPressure >= policy.memoryPressureRatio
+        ? "HighMemory"
+        : snapshot.eventLoopLagMicros >= policy.eventLoopLagMicros
+          ? "HighEventLoopLag"
+          : undefined;
 
-  // Back off sharply under pressure; otherwise explore one extra slot after proven saturation.
-  const admissionLimit = isUnderPressure
-    ? Math.max(1, Math.floor(state.admissionLimit / 2))
-    : snapshot.inFlightHighWater >= state.admissionLimit
-      ? Math.min(state.maxConcurrency, state.admissionLimit + 1)
-      : state.admissionLimit;
+  const currentLimit = state.admission.limit;
+  let admission: AdmissionControl;
 
-  return Result.succeed({ ...state, admissionLimit, snapshot, assignments });
+  // Draining is terminal for this invocation, even if a contradictory snapshot arrives later.
+  if (
+    AdmissionControl.$is("Suppressed")(state.admission) &&
+    state.admission.reason === "Draining"
+  ) {
+    admission = state.admission;
+  } else if (snapshot.admissionState === "Draining") {
+    admission = AdmissionControl.Suppressed({
+      limit: currentLimit,
+      reason: "Draining",
+      suppressedAtSnapshotSequence: snapshot.snapshotSequence,
+    });
+  } else if (pressureReason !== undefined) {
+    admission = AdmissionControl.Suppressed({
+      limit: Math.max(1, Math.floor(currentLimit / 2)),
+      reason: pressureReason,
+      suppressedAtSnapshotSequence: snapshot.snapshotSequence,
+    });
+  } else if (AdmissionControl.$is("Suppressed")(state.admission)) {
+    // One newer healthy snapshot restores routing but preserves the reduced limit.
+    admission = AdmissionControl.Eligible({ limit: currentLimit });
+  } else {
+    // Healthy saturation is evidence that one additional slot may be explored safely.
+    admission = AdmissionControl.Eligible({
+      limit:
+        snapshot.inFlightHighWater >= currentLimit
+          ? Math.min(state.maxConcurrency, currentLimit + 1)
+          : currentLimit,
+    });
+  }
+
+  return Result.succeed({ ...state, admission, snapshot, assignments });
 };

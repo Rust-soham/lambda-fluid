@@ -1,7 +1,14 @@
 import * as S from "effect/Schema";
 
 import { NonNegativeInt } from "./base.js";
-import { HttpStatusCode, RequestId, WorkerId } from "./identifiers.js";
+import { AttemptId, HttpStatusCode, RequestId, WorkerId } from "./identifiers.js";
+
+export const ResponseFailureReason = S.Literals([
+  "HandlerFailure",
+  "DeadlineExceeded",
+  "Cancelled",
+]);
+export type ResponseFailureReason = typeof ResponseFailureReason.Type;
 
 // oxfmt-ignore
 export class ResponseStarted 
@@ -9,6 +16,7 @@ export class ResponseStarted
     "ResponseStarted",
     {
       requestId: RequestId,
+      attemptId: AttemptId,
       workerId: WorkerId,
       statusCode: HttpStatusCode,
       startedAtEpochMs: NonNegativeInt,
@@ -21,6 +29,7 @@ export class ResponseBodyChunk
     "ResponseBodyChunk",
     {
       requestId: RequestId,
+      attemptId: AttemptId,
       sequence: NonNegativeInt,
       body: S.String,
     }
@@ -32,8 +41,21 @@ export class ResponseEnd
     "ResponseEnd", 
     {
       requestId: RequestId,
+      attemptId: AttemptId,
       completedAtEpochMs: NonNegativeInt,
       totalChunks: NonNegativeInt,
+    }
+) {}
+
+// oxfmt-ignore
+export class ResponseFailed
+  extends S.TaggedClass<ResponseFailed>()(
+    "ResponseFailed",
+    {
+      requestId: RequestId,
+      attemptId: AttemptId,
+      failedAtEpochMs: NonNegativeInt,
+      reason: ResponseFailureReason,
     }
 ) {}
 
@@ -41,6 +63,7 @@ export const ResponseFrame = S.Union([
   ResponseStarted,
   ResponseBodyChunk,
   ResponseEnd,
+  ResponseFailed,
 ]).pipe(S.toTaggedUnion("_tag"));
 
 export type ResponseFrame = typeof ResponseFrame.Type;
