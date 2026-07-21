@@ -1,5 +1,5 @@
 {
-  "name": "@lambda-fluid/orchestrator",
+  "name": "@lambda-fluid/worker",
   "private": true,
   "type": "module",
   "exports": {
@@ -7,7 +7,7 @@
   },
   "scripts": {
     "check": "vp check",
-    "test": "vp test run packages/orchestrator/test"
+    "test": "vp test run packages/worker/test"
   },
   "dependencies": {
     "@lambda-fluid/protocol": "workspace:*",

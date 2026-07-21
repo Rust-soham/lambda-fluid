@@ -1,0 +1,18 @@
+{
+  "name": "@lambda-fluid/benchmark",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check": "vp check"
+  },
+  "dependencies": {
+    "@lambda-fluid/protocol": "workspace:*",
+    "@lambda-fluid/worker": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.0"
+  }
+}

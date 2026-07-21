@@ -10,6 +10,10 @@ export const ResponseFailureReason = S.Literals([
 ]);
 export type ResponseFailureReason = typeof ResponseFailureReason.Type;
 
+// Header names map to all transmitted values so repeated headers are preserved.
+export const ResponseHeaders = S.Record(S.String, S.Array(S.String));
+export type ResponseHeaders = typeof ResponseHeaders.Type;
+
 // oxfmt-ignore
 export class ResponseStarted 
   extends S.TaggedClass<ResponseStarted>()(
@@ -19,6 +23,7 @@ export class ResponseStarted
       attemptId: AttemptId,
       workerId: WorkerId,
       statusCode: HttpStatusCode,
+      headers: ResponseHeaders,
       startedAtEpochMs: NonNegativeInt,
     }
 ) {}

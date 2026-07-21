@@ -1,5 +1,5 @@
 {
-  "name": "@lambda-fluid/orchestrator",
+  "name": "@lambda-fluid/tunnel",
   "private": true,
   "type": "module",
   "exports": {
@@ -7,9 +7,10 @@
   },
   "scripts": {
     "check": "vp check",
-    "test": "vp test run packages/orchestrator/test"
+    "test": "vp test run packages/tunnel/test"
   },
   "dependencies": {
+    "@effect/platform-node": "4.0.0-beta.98",
     "@lambda-fluid/protocol": "workspace:*",
     "effect": "4.0.0-beta.98"
   },

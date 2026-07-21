@@ -38,6 +38,19 @@ importers:
         specifier: 'catalog:'
         version: 0.2.5(@types/node@25.9.0)(@voidzero-dev/vite-plus-core@0.2.5(@types/node@25.9.0)(yaml@2.9.0))(yaml@2.9.0)
 
+  packages/benchmark:
+    dependencies:
+      '@lambda-fluid/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      '@lambda-fluid/worker':
+        specifier: workspace:*
+        version: link:../worker
+    devDependencies:
+      '@types/node':
+        specifier: ^25.9.0
+        version: 25.9.0
+
   packages/infra:
     dependencies:
       '@effect/platform-node':
@@ -85,6 +98,47 @@ importers:
       '@types/node':
         specifier: ^25.9.0
         version: 25.9.0
+
+  packages/tunnel:
+    dependencies:
+      '@effect/platform-node':
+        specifier: 4.0.0-beta.98
+        version: 4.0.0-beta.98(effect@4.0.0-beta.98)(ioredis@5.10.1)
+      '@lambda-fluid/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      effect:
+        specifier: 4.0.0-beta.98
+        version: 4.0.0-beta.98
+    devDependencies:
+      '@effect/vitest':
+        specifier: 4.0.0-beta.98
+        version: 4.0.0-beta.98(effect@4.0.0-beta.98)(vitest@4.1.10)
+      '@types/node':
+        specifier: ^25.9.0
+        version: 25.9.0
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@25.9.0)(@vitest/browser-preview@4.1.10)(vite@8.1.5(@types/node@25.9.0)(yaml@2.9.0))
+
+  packages/worker:
+    dependencies:
+      '@lambda-fluid/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      effect:
+        specifier: 4.0.0-beta.98
+        version: 4.0.0-beta.98
+    devDependencies:
+      '@effect/vitest':
+        specifier: 4.0.0-beta.98
+        version: 4.0.0-beta.98(effect@4.0.0-beta.98)(vitest@4.1.10)
+      '@types/node':
+        specifier: ^25.9.0
+        version: 25.9.0
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@25.9.0)(@vitest/browser-preview@4.1.10)(vite@8.1.5(@types/node@25.9.0)(yaml@2.9.0))
 
 packages:
 
@@ -2132,10 +2186,6 @@ packages:
     resolution: {integrity: sha512-dAqSqE/RabpBKI8+h26GfLq6Vb3JVXs30XYQjdMjaj/c2tS8IYYMbIzP599KtRj7c57/wYApb3QjgRgXmrCukA==}
     engines: {node: '>=18'}
 
-  tinyglobby@0.2.16:
-    resolution: {integrity: sha512-pn99VhoACYR8nFHhxqix+uvsbXineAasWm5ojXoN8xEwK5Kd3/TrhNn1wByuD52UxWRLy8pu+kRMniEi6Eq9Zg==}
-    engines: {node: '>=12.0.0'}
-
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
@@ -3685,10 +3735,6 @@ snapshots:
     dependencies:
       reusify: 1.1.0
 
-  fdir@6.5.0(picomatch@4.0.4):
-    optionalDependencies:
-      picomatch: 4.0.4
-
   fdir@6.5.0(picomatch@4.0.5):
     optionalDependencies:
       picomatch: 4.0.5
@@ -4248,11 +4294,6 @@ snapshots:
 
   tinyexec@1.1.2: {}
 
-  tinyglobby@0.2.16:
-    dependencies:
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
-
   tinyglobby@0.2.17:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.5)
@@ -4376,11 +4417,11 @@ snapshots:
       magic-string: 0.30.21
       obug: 2.1.1
       pathe: 2.0.3
-      picomatch: 4.0.4
+      picomatch: 4.0.5
       std-env: 4.1.0
       tinybench: 2.9.0
       tinyexec: 1.1.2
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
       tinyrainbow: 3.1.0
       vite: '@voidzero-dev/vite-plus-core@0.2.5(@types/node@25.9.0)(yaml@2.9.0)'
       why-is-node-running: 2.3.0
@@ -4404,11 +4445,11 @@ snapshots:
       magic-string: 0.30.21
       obug: 2.1.1
       pathe: 2.0.3
-      picomatch: 4.0.4
+      picomatch: 4.0.5
       std-env: 4.1.0
       tinybench: 2.9.0
       tinyexec: 1.1.2
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
       tinyrainbow: 3.1.0
       vite: 8.1.5(@types/node@25.9.0)(yaml@2.9.0)
       why-is-node-running: 2.3.0
