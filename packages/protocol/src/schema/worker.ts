@@ -40,6 +40,7 @@ export class WorkerHealthSnapshot
       snapshotSequence: NonNegativeInt,
       sampledAtEpochMs: NonNegativeInt,
       inFlight: NonNegativeInt,
+      inFlightHighWater: NonNegativeInt,
       cpuUsedMicros: NonNegativeInt,
       sampleIntervalMicros: PositiveInt,
       rssBytes: NonNegativeInt,

@@ -1,4 +1,7 @@
-import { Console, Data, Effect, Schema } from "effect";
+import * as Console from "effect/Console";
+import * as Data from "effect/Data";
+import * as Effect from "effect/Effect";
+import * as Schema from "effect/Schema";
 
 export class UserNotFound extends Data.TaggedError("UserNotFound")<{
   cause: Schema.String;

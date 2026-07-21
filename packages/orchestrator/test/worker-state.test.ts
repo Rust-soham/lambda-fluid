@@ -7,7 +7,7 @@ import {
   WorkerId,
   WorkerRegistration,
 } from "@lambda-fluid/protocol";
-import { Result } from "effect";
+import * as Result from "effect/Result";
 
 import {
   accept,
@@ -43,6 +43,7 @@ const snapshot = (
     snapshotSequence: 1,
     sampledAtEpochMs: 1_000,
     inFlight: 7,
+    inFlightHighWater: 7,
     cpuUsedMicros: 10_000,
     sampleIntervalMicros: 100_000,
     rssBytes: 300_000_000,
@@ -64,6 +65,18 @@ describe("worker admission state", () => {
   it("tracks reservations over a stale worker snapshot", () => {
     let state = success(makeWorkerState(registration, snapshot()));
     assert.strictEqual(effectiveLoad(state), 7);
+
+    state = success(
+      applySnapshot(
+        state,
+        snapshot({
+          snapshotSequence: 2,
+          sampledAtEpochMs: 1_050,
+          inFlightHighWater: 8,
+        })
+      )
+    );
+    assert.strictEqual(state.admissionLimit, 9);
 
     state = success(reserve(state, requestA, 1_100));
     state = success(reserve(state, requestB, 1_101));
@@ -126,5 +139,59 @@ describe("worker admission state", () => {
       assert.fail("Expected a draining worker to reject the reservation");
     }
     assert.strictEqual(result.failure.reason, "Draining");
+  });
+
+  it("increases admission only after healthy utilization reaches the current limit", () => {
+    let state = success(
+      makeWorkerState(registration, snapshot({ inFlight: 0, inFlightHighWater: 0 }))
+    );
+    assert.strictEqual(state.admissionLimit, 1);
+
+    state = success(
+      applySnapshot(
+        state,
+        snapshot({
+          snapshotSequence: 2,
+          sampledAtEpochMs: 2_000,
+          inFlight: 0,
+          inFlightHighWater: 0,
+        })
+      )
+    );
+    assert.strictEqual(state.admissionLimit, 1);
+
+    state = success(
+      applySnapshot(
+        state,
+        snapshot({
+          snapshotSequence: 3,
+          sampledAtEpochMs: 3_000,
+          inFlight: 1,
+          inFlightHighWater: 1,
+        })
+      )
+    );
+    assert.strictEqual(state.admissionLimit, 2);
+  });
+
+  it("halves the admission limit when a worker reports CPU pressure", () => {
+    let state = success(makeWorkerState(registration, snapshot({ inFlight: 3 })));
+    assert.strictEqual(state.admissionLimit, 4);
+
+    state = success(
+      applySnapshot(
+        state,
+        snapshot({
+          snapshotSequence: 2,
+          sampledAtEpochMs: 2_000,
+          inFlight: 4,
+          inFlightHighWater: 4,
+          cpuUsedMicros: 80_000,
+        })
+      )
+    );
+
+    assert.strictEqual(state.admissionLimit, 2);
+    assert.strictEqual(effectiveLoad(state), 4);
   });
 });
