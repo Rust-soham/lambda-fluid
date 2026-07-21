@@ -1,7 +1,7 @@
 import * as S from "effect/Schema";
 
 import { NonNegativeInt, PositiveInt, ProtocolVersion } from "./base.js";
-import { DeploymentId, RequestId, WorkerId } from "./identifiers.js";
+import { RequestId, WorkerId } from "./identifiers.js";
 
 export const JobNackReason = S.Literals([
   "AtCapacity",
@@ -23,7 +23,6 @@ export class WorkerRegistration
     {
       protocolVersion: ProtocolVersion,
       workerId: WorkerId,
-      deploymentId: DeploymentId,
       maxConcurrency: PositiveInt,
       connectionGeneration: PositiveInt,
       invocationDeadlineEpochMs: NonNegativeInt,

@@ -66,7 +66,6 @@ Conceptual model:
 ```text
 RegisterWorker
   protocolVersion
-  deploymentId
   workerId
   runtime: "nodejs"
   maxConcurrency
@@ -75,7 +74,6 @@ RegisterWorker
 
 JobRequest
   requestId
-  deploymentId
   sentAt
   deadline
   workload
@@ -189,7 +187,6 @@ results are logged and ignored.
 The first worker frame must be `RegisterWorker`. Registration binds:
 
 - socket to worker ID;
-- worker ID to deployment ID;
 - negotiated protocol version;
 - concurrency limit;
 - credentials;
@@ -207,8 +204,6 @@ sketches do.
 - `HighCpu`
 - `HighEventLoopLag`
 - `HighMemory`
-- `DeadlineTooClose`
-- `UnsupportedWorkload`
 - `Internal`
 
 The router may retry another worker for retryable reasons. It must preserve the
@@ -222,7 +217,6 @@ Suggested tagged errors:
 - `FrameDecodeError`
 - `UnsupportedProtocolVersion`
 - `AuthenticationFailed`
-- `UnknownDeployment`
 - `NoHealthyWorkers`
 - `WorkerDisconnected`
 - `JobNacked`

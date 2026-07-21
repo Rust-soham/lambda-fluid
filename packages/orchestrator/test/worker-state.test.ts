@@ -1,7 +1,6 @@
 import { assert, describe, it } from "@effect/vitest";
 
 import {
-  DeploymentId,
   RequestId,
   WorkerHealthSnapshot,
   WorkerId,
@@ -21,14 +20,12 @@ import {
 } from "../src/worker-state.js";
 
 const workerId = WorkerId.make("worker-1");
-const deploymentId = DeploymentId.make("deployment-1");
 const requestA = RequestId.make("request-a");
 const requestB = RequestId.make("request-b");
 
 const registration = WorkerRegistration.make({
   protocolVersion: 1,
   workerId,
-  deploymentId,
   maxConcurrency: 10,
   connectionGeneration: 1,
   invocationDeadlineEpochMs: 900_000,

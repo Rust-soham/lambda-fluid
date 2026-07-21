@@ -18,7 +18,7 @@ Persistent orchestrator
         | persistent outbound-initiated TCP tunnels
         v
 AWS Lambda worker invocations
-  - one deployment's code
+  - the application's worker bundle
   - frame decoder/encoder
   - bounded job fibers
   - process metrics sampler
@@ -28,11 +28,14 @@ AWS Lambda worker invocations
 
 ## Deployment Unit
 
-**Decision:** a worker pool corresponds to one function deployment.
+**Decision:** one orchestrator installation owns one application worker pool.
 
-Every worker in a pool runs the same bundle and configuration. The orchestrator
-may manage multiple named pools later, but it must never route a job for one
-deployment into another deployment's worker.
+Every worker runs the same application bundle and configuration. Application
+identity is implicit in the programmer-owned installation, so it is not
+repeated in job frames, worker registration, or orchestrator state. Hosting
+multiple applications behind one orchestrator is a separate future
+exploration because it requires authentication, isolation, quotas, fair
+scheduling, and usage attribution.
 
 The transcript alternates between:
 
@@ -51,8 +54,8 @@ provision deterministically. This remains an implementation decision to test.
 4. Start the configured initial worker count.
 5. Each invocation creates a unique `workerId`.
 6. Each invocation opens an outbound connection to the orchestrator.
-7. The worker sends a registration frame containing deployment ID, worker ID,
-   protocol version, limits, and runtime metadata.
+7. The worker sends a registration frame containing worker ID, protocol
+   version, limits, and runtime metadata.
 8. The orchestrator authenticates it and adds it to the registry.
 9. The worker enters its receive loop and starts health and heartbeat fibers.
 10. The benchmark waits until the expected ready-worker count is reached.
@@ -79,8 +82,8 @@ concurrency.
 5. The orchestrator sends a job frame.
 6. The worker validates the frame and performs an admission check.
 7. The worker replies with accepted or nack.
-8. An accepted job obtains a semaphore permit and starts as a supervised child
-   fiber.
+8. An accepted job obtains a transactional permit and starts as a supervised
+   child fiber.
 9. Its CPU and I/O phases execute.
 10. The worker sends a result or typed failure frame.
 11. The orchestrator completes the matching `Deferred`.
@@ -149,7 +152,6 @@ to a worker whose runtime has available capacity.
 
 Stores immutable worker snapshots keyed by worker ID:
 
-- deployment ID;
 - connection handle;
 - connection generation;
 - in-flight count;
@@ -217,7 +219,7 @@ Worker root scope
   |   `- reconnect supervisor
   |- health sampler
   |- drain signal
-  |- semaphore with N permits
+  |- transactional semaphore with N permits
   `- supervised job fibers
       |- job A
       |- job B
@@ -251,7 +253,6 @@ Suggested worker snapshot:
 
 ```text
 workerId
-deploymentId
 timestamp
 inFlight
 maxConcurrency
@@ -297,7 +298,7 @@ Drain sequence:
 1. mark worker draining;
 2. stop accepting new jobs;
 3. notify orchestrator;
-4. wait for all semaphore permits to return;
+4. wait for all transactional permits to return;
 5. force-timeout remaining jobs at the drain deadline;
 6. send final metrics;
 7. close tunnel;
@@ -349,13 +350,13 @@ At minimum:
 
 - TLS for remote tunnel traffic;
 - short-lived worker credentials;
-- deployment ID bound to credential;
+- credentials bound to the application-owned orchestrator installation;
 - frame size limits;
 - schema validation;
 - request deadlines;
 - no secrets in logs;
 - no arbitrary code upload;
-- one deployment per worker process;
+- one application worker bundle per worker process;
 - explicit outbound network policy for real use.
 
 Effect scopes and fibers improve lifecycle safety. They do not isolate malicious

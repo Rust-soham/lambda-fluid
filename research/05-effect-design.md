@@ -20,11 +20,11 @@ orchestrator lifecycles explicit:
 | `Schema`                   | protocol, config, benchmark artifact validation          |
 | `Context.Service`          | service contracts in the installed Effect beta           |
 | `Layer`                    | local, test, and AWS composition                         |
-| `Ref`                      | registry snapshots, health, counters, worker state       |
+| `STM` / `TxRef`            | atomic fleet selection, reservation, and worker state    |
 | `Deferred`                 | one client request waiting for one remote terminal frame |
 | `Queue`                    | bounded admission and serialized socket writes           |
-| `Semaphore`                | in-worker request limit and drain completion             |
-| `Effect.fork`              | supervised request and subsystem fibers                  |
+| `TxSemaphore`              | transactional in-worker permits and drain completion     |
+| `Effect.forkScoped`        | supervised request and subsystem fibers                  |
 | `Scope` / `acquireRelease` | connection and server ownership                          |
 | `Schedule`                 | reconnect, heartbeat, health sample, idle decision       |
 | timeout/race               | request deadline and drain deadline                      |
@@ -77,5 +77,6 @@ span earlier prerelease APIs and are not source code. Follow installed types:
 
 - `Context.Service` for service declarations;
 - `Schema.Schema.Type` for decoded types;
-- `Semaphore` for permits;
+- `TxSemaphore` for permits that compose atomically with admission and drain
+  state;
 - current unstable socket and HTTP modules where appropriate.

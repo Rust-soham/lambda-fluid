@@ -14,6 +14,10 @@ Fluid Compute interesting on AWS Lambda:
 The result should explain the architecture with real traces and measurements,
 not imitate Vercel's private fleet or claim access to its economics.
 
+Lambda Fluid is an open-source library that programmers install into an
+existing application and infrastructure. One orchestrator installation owns
+one application worker pool; it is not a hosted multi-tenant compute service.
+
 ## The Core Mental Model
 
 ```text
@@ -65,6 +69,7 @@ A live demo and benchmark that shows:
 
 - A Cloudflare implementation or Durable Object demo.
 - A generic multi-language SDK.
+- A hosted multi-tenant control plane or shared multi-application orchestrator.
 - Arbitrary untrusted tenant code in shared workers.
 - A global Vercel-like compute resolver fleet.
 - Exact Vercel pricing, profit margin, or private protocol reproduction.
@@ -82,6 +87,8 @@ A live demo and benchmark that shows:
 - Benchmark data proves its displayed totals and separates AWS cost from the
   Vercel explanatory model.
 - Documentation states where this reconstruction differs from Vercel.
+- Core protocol messages do not carry tenant or deployment identity; the
+  application installation is the trust and routing boundary.
 
 ## Milestones
 

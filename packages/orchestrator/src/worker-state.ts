@@ -1,5 +1,4 @@
 import type {
-  DeploymentId,
   RequestId,
   WorkerHealthSnapshot,
   WorkerId,
@@ -20,7 +19,6 @@ export const Assignment = Data.taggedEnum<Assignment>();
 // Combines the worker's last report with newer orchestrator-owned reservations.
 export interface WorkerState {
   readonly workerId: WorkerId;
-  readonly deploymentId: DeploymentId;
   readonly connectionGeneration: number;
   readonly maxConcurrency: number;
   readonly admissionLimit: number;
@@ -81,7 +79,6 @@ export const makeWorkerState = (
 
   return Result.succeed({
     workerId: registration.workerId,
-    deploymentId: registration.deploymentId,
     connectionGeneration: registration.connectionGeneration,
     maxConcurrency: registration.maxConcurrency,
     admissionLimit: Math.min(

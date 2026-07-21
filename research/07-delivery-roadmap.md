@@ -1,17 +1,14 @@
 # Delivery Roadmap
 
-## 1. Re-establish Infrastructure
+## 1. Local Protocol And State Core
 
-Use [Infrastructure Health](./08-infrastructure-health.md) as the starting
-point. Do not build on the old smoke resources.
+Complete and test the pure model before adding runtime or infrastructure:
 
-- repair the AWS profile selection and remove the dependency on a missing AWS
-  CLI from the wrapper;
-- deploy a fresh Lambda smoke function and prove invoke/log/config health;
-- create a fresh Fly deployment only if Fly is retained as the orchestrator
-  host;
-- configure a persistent TCP listener, TLS/authentication, and a nonzero warm
-  policy suitable for worker tunnels.
+- worker registration and health schemas;
+- reservations, accept, nack, suppression, and snapshot reconciliation;
+- atomic fleet selection and reservation;
+- starting-worker capacity claims;
+- typed no-capacity and transition failures.
 
 ## 2. Local Streaming Core
 
@@ -37,7 +34,19 @@ Add:
 
 This stage can use a fixed number of local processes to validate mechanics.
 
-## 4. AWS Worker
+## 4. Re-establish Infrastructure
+
+Use [Infrastructure Health](./08-infrastructure-health.md) as the starting
+point. Do not build on the old smoke resources.
+
+- repair the AWS profile selection and remove the dependency on a missing AWS
+  CLI from the wrapper;
+- deploy a fresh Lambda smoke function and prove invoke/log/config health;
+- select and configure a persistent orchestrator host only after the local
+  tunnel works;
+- configure TLS/authentication and a warm policy suitable for worker tunnels.
+
+## 5. AWS Worker
 
 Deploy one real worker that opens an outbound tunnel and returns after drain.
 Then validate:
@@ -49,7 +58,7 @@ Then validate:
 - invocation duration and process CPU observation;
 - graceful return before Lambda timeout.
 
-## 5. Pack-and-Scale
+## 6. Pack-and-Scale
 
 Implement the production-shaped decision path:
 
@@ -62,7 +71,7 @@ Implement the production-shaped decision path:
 The initial scale policy can be simple, but it must be measured rather than
 hard-coded as one request equals one worker or one fixed pool handles all work.
 
-## 6. Benchmark
+## 7. Benchmark
 
 Run matched workloads through:
 
@@ -74,7 +83,7 @@ Run matched workloads through:
 Persist raw observations, configuration, region, memory, git commit, and
 pricing source date. Render only derived reports from those artifacts.
 
-## 7. Publish
+## 8. Publish
 
 The article and README should lead with:
 
