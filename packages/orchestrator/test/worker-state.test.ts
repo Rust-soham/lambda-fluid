@@ -31,6 +31,7 @@ const registration = WorkerRegistration.make({
   deploymentId,
   maxConcurrency: 10,
   connectionGeneration: 1,
+  invocationDeadlineEpochMs: 900_000,
 });
 
 const snapshot = (
@@ -48,7 +49,7 @@ const snapshot = (
     heapUsedBytes: 100_000_000,
     memoryLimitBytes: 1_000_000_000,
     eventLoopLagMicros: 1_000,
-    draining: false,
+    admissionState: "Accepting",
     ...overrides,
   });
 
@@ -113,5 +114,17 @@ describe("worker admission state", () => {
     }
     assert.strictEqual(stale.failure.reason, "StaleSnapshot");
     assert.strictEqual(effectiveLoad(state), 10);
+  });
+
+  it("rejects new reservations after a worker begins draining", () => {
+    const state = success(
+      makeWorkerState(registration, snapshot({ admissionState: "Draining" }))
+    );
+
+    const result = reserve(state, requestA, 1_100);
+    if (Result.isSuccess(result)) {
+      assert.fail("Expected a draining worker to reject the reservation");
+    }
+    assert.strictEqual(result.failure.reason, "Draining");
   });
 });

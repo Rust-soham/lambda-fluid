@@ -9,11 +9,14 @@ export const JobNackReason = S.Literals([
   "HighCpu",
   "HighEventLoopLag",
   "HighMemory",
-  "DeadlineTooClose",
   "Internal",
 ]);
 export type JobNackReason = typeof JobNackReason.Type;
 
+export const WorkerAdmissionState = S.Literals(["Accepting", "Draining"]);
+export type WorkerAdmissionState = typeof WorkerAdmissionState.Type;
+
+// oxfmt-ignore
 export class WorkerRegistration 
   extends S.TaggedClass<WorkerRegistration>()(
     "WorkerRegistration",
@@ -23,9 +26,11 @@ export class WorkerRegistration
       deploymentId: DeploymentId,
       maxConcurrency: PositiveInt,
       connectionGeneration: PositiveInt,
+      invocationDeadlineEpochMs: NonNegativeInt,
     }
 ) {}
 
+// oxfmt-ignore
 export class WorkerHealthSnapshot 
   extends S.TaggedClass<WorkerHealthSnapshot>()(
     "WorkerHealthSnapshot",
@@ -41,10 +46,11 @@ export class WorkerHealthSnapshot
       heapUsedBytes: NonNegativeInt,
       memoryLimitBytes: PositiveInt,
       eventLoopLagMicros: NonNegativeInt,
-      draining: S.Boolean,
+      admissionState: WorkerAdmissionState,
     }
 ) {}
 
+// oxfmt-ignore
 export class JobAccepted 
   extends S.TaggedClass<JobAccepted>()("JobAccepted", {
     requestId: RequestId,
@@ -53,6 +59,7 @@ export class JobAccepted
     acceptedAtEpochMs: NonNegativeInt,
 }) {}
 
+// oxfmt-ignore
 export class JobNack 
   extends S.TaggedClass<JobNack>()("JobNack", {
     requestId: RequestId,

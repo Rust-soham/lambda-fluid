@@ -3,6 +3,7 @@ import * as S from "effect/Schema";
 import { NonNegativeInt } from "./base.js";
 import { HttpStatusCode, RequestId, WorkerId } from "./identifiers.js";
 
+// oxfmt-ignore
 export class ResponseStarted 
   extends S.TaggedClass<ResponseStarted>()(
     "ResponseStarted",
@@ -14,6 +15,7 @@ export class ResponseStarted
     }
 ) {}
 
+// oxfmt-ignore
 export class ResponseBodyChunk 
   extends S.TaggedClass<ResponseBodyChunk>()(
     "ResponseBodyChunk",
@@ -24,6 +26,7 @@ export class ResponseBodyChunk
     }
 ) {}
 
+// oxfmt-ignore
 export class ResponseEnd 
   extends S.TaggedClass<ResponseEnd>()(
     "ResponseEnd", 

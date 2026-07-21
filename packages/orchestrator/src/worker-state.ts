@@ -34,6 +34,7 @@ export const WorkerTransitionFailure = S.Literals([
 ]);
 export type WorkerTransitionFailure = typeof WorkerTransitionFailure.Type;
 
+// oxfmt-ignore
 export class WorkerTransitionError 
   extends S.TaggedErrorClass<WorkerTransitionError>()(
     "Orchestrator.WorkerTransitionError",
@@ -44,12 +45,8 @@ export class WorkerTransitionError
 
 export type TransitionResult = Result.Result<WorkerState, WorkerTransitionError>;
 
-
-
 const failure = (reason: WorkerTransitionFailure): TransitionResult =>
   Result.fail(WorkerTransitionError.make({ reason }));
-
-
 
 export const makeWorkerState = (
   registration: WorkerRegistration,
@@ -72,7 +69,6 @@ export const makeWorkerState = (
   });
 };
 
-
 const overlaysSnapshot = (assignment: Assignment, sampledAtEpochMs: number): boolean =>
   Assignment.$match(assignment, {
     Reserved: () => true,
@@ -91,13 +87,12 @@ export const effectiveLoad = (state: WorkerState): number => {
   return state.snapshot.inFlight + overlay;
 };
 
-
 export const reserve = (
   state: WorkerState,
   requestId: RequestId,
   reservedAtEpochMs: number
 ): TransitionResult => {
-  if (state.snapshot.draining) {
+  if (state.snapshot.admissionState === "Draining") {
     return failure("Draining");
   }
   if (state.assignments.has(requestId)) {
@@ -111,7 +106,6 @@ export const reserve = (
   assignments.set(requestId, Assignment.Reserved({ reservedAtEpochMs }));
   return Result.succeed({ ...state, assignments });
 };
-
 
 export const accept = (
   state: WorkerState,
@@ -128,7 +122,6 @@ export const accept = (
   return Result.succeed({ ...state, assignments });
 };
 
-
 export const release = (state: WorkerState, requestId: RequestId): TransitionResult => {
   if (!state.assignments.has(requestId)) {
     return failure("ReservationMissing");
@@ -138,7 +131,6 @@ export const release = (state: WorkerState, requestId: RequestId): TransitionRes
   assignments.delete(requestId);
   return Result.succeed({ ...state, assignments });
 };
-
 
 export const applySnapshot = (
   state: WorkerState,
