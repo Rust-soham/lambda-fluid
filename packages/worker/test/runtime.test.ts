@@ -1,10 +1,10 @@
 import { assert, describe, it } from "@effect/vitest";
 import {
   AttemptId,
+  ApplicationRequest,
   HttpStatusCode,
   JobRequest,
   RequestId,
-  SyntheticWorkload,
   WorkerId,
   type WorkerToOrchestratorFrame,
 } from "@lambda-fluid/protocol";
@@ -17,8 +17,19 @@ import { makeWorkerRuntime } from "../src/runtime.js";
 const workerId = WorkerId.make("worker-1");
 
 const testHandler: JobHandler = async (job, { signal }) => {
+  const input = JSON.parse(job.request.body);
+  if (
+    typeof input !== "object" ||
+    input === null ||
+    !("ioDelayMs" in input) ||
+    typeof input.ioDelayMs !== "number" ||
+    !("responseChunks" in input) ||
+    typeof input.responseChunks !== "number"
+  ) {
+    throw new Error("invalid test request");
+  }
   await new Promise<void>((resolve, reject) => {
-    const timeout = setTimeout(resolve, job.workload.ioDelayMs);
+    const timeout = setTimeout(resolve, input.ioDelayMs);
     signal.addEventListener(
       "abort",
       () => {
@@ -32,10 +43,10 @@ const testHandler: JobHandler = async (job, { signal }) => {
     statusCode: HttpStatusCode.make(200),
     headers: { "content-type": ["text/plain"] },
     bodyChunks: Array.from(
-      { length: job.workload.responseChunks },
+      { length: input.responseChunks },
       (_, index) => `${job.requestId}:${index}`
     ),
-    delayBetweenChunksMs: job.workload.delayBetweenChunksMs,
+    delayBetweenChunksMs: 0,
   };
 };
 
@@ -47,12 +58,11 @@ const request = (name: string, ioDelayMs: number, responseChunks = 1): JobReques
     sentAtEpochMs: Date.now(),
     deadlineEpochMs: Date.now() + 10_000,
     retrySafety: "RetrySafe",
-    workload: SyntheticWorkload.make({
-      firstCpuMs: 1,
-      ioDelayMs,
-      secondCpuMs: 1,
-      responseChunks,
-      delayBetweenChunksMs: 0,
+    request: ApplicationRequest.make({
+      method: "POST",
+      path: "/test",
+      headers: { "content-type": ["application/json"] },
+      body: JSON.stringify({ ioDelayMs, responseChunks }),
     }),
   });
 

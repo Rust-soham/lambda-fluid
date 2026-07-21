@@ -4,9 +4,9 @@ import * as Result from "effect/Result";
 
 import {
   AttemptId,
+  ApplicationRequest,
   JobRequest,
   RequestId,
-  SyntheticWorkload,
   decodeFrameChunk,
   decodeOrchestratorPayload,
   emptyFrameDecoderState,
@@ -70,12 +70,11 @@ describe("length-prefixed framing", () => {
         sentAtEpochMs: 1_000,
         deadlineEpochMs: 31_000,
         retrySafety: "RetrySafe",
-        workload: SyntheticWorkload.make({
-          firstCpuMs: 5,
-          ioDelayMs: 100,
-          secondCpuMs: 5,
-          responseChunks: 3,
-          delayBetweenChunksMs: 20,
+        request: ApplicationRequest.make({
+          method: "POST",
+          path: "/orders",
+          headers: { "content-type": ["application/json"] },
+          body: JSON.stringify({ sku: "sku-123" }),
         }),
       });
 

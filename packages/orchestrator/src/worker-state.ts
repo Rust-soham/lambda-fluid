@@ -44,6 +44,8 @@ export interface WorkerState {
   readonly admission: AdmissionControl;
   readonly snapshot: WorkerHealthSnapshot;
   readonly assignments: ReadonlyMap<RequestId, Assignment>;
+  /** Highest load observed from snapshots plus orchestrator-owned reservations. */
+  readonly peakEffectiveLoad: number;
 }
 
 // Defines when runtime measurements should reduce a worker's admission limit.
@@ -51,6 +53,11 @@ export interface HealthPolicy {
   readonly cpuPressureRatio: number;
   readonly memoryPressureRatio: number;
   readonly eventLoopLagMicros: number;
+}
+
+export interface WorkerStateOptions {
+  /** Explicit seed used by controlled benchmarks; production defaults to one. */
+  readonly initialAdmissionLimit?: number;
 }
 
 export const defaultHealthPolicy: HealthPolicy = {
@@ -90,7 +97,8 @@ const failure = (reason: WorkerTransitionFailure): TransitionResult =>
 // Creates state only when registration and the initial snapshot identify the same worker connection.
 export const makeWorkerState = (
   registration: WorkerRegistration,
-  snapshot: WorkerHealthSnapshot
+  snapshot: WorkerHealthSnapshot,
+  options: WorkerStateOptions = {}
 ): TransitionResult => {
   if (registration.workerId !== snapshot.workerId) {
     return failure("WorkerMismatch");
@@ -99,6 +107,11 @@ export const makeWorkerState = (
     return failure("StaleConnection");
   }
 
+  const initialAdmissionLimit = Math.min(
+    registration.maxConcurrency,
+    Math.max(1, options.initialAdmissionLimit ?? snapshot.inFlight + 1)
+  );
+
   return Result.succeed({
     workerId: registration.workerId,
     connectionGeneration: registration.connectionGeneration,
@@ -106,21 +119,16 @@ export const makeWorkerState = (
     admission:
       snapshot.admissionState === "Draining"
         ? AdmissionControl.Suppressed({
-            limit: Math.min(
-              registration.maxConcurrency,
-              Math.max(1, snapshot.inFlight + 1)
-            ),
+            limit: initialAdmissionLimit,
             reason: "Draining",
             suppressedAtSnapshotSequence: snapshot.snapshotSequence,
           })
         : AdmissionControl.Eligible({
-            limit: Math.min(
-              registration.maxConcurrency,
-              Math.max(1, snapshot.inFlight + 1)
-            ),
+            limit: initialAdmissionLimit,
           }),
     snapshot,
     assignments: new Map(),
+    peakEffectiveLoad: snapshot.inFlight,
   });
 };
 
@@ -169,7 +177,11 @@ export const reserve = (
 
   const assignments = new Map(state.assignments);
   assignments.set(requestId, Assignment.Reserved({ attemptId, reservedAtEpochMs }));
-  return Result.succeed({ ...state, assignments });
+  return Result.succeed({
+    ...state,
+    assignments,
+    peakEffectiveLoad: Math.max(state.peakEffectiveLoad, effectiveLoad(state) + 1),
+  });
 };
 
 // Makes fresher worker evidence authoritative over the last routable snapshot.

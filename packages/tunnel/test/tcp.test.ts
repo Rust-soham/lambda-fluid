@@ -2,10 +2,10 @@ import { NodeSocket, NodeSocketServer } from "@effect/platform-node";
 import { assert, describe, it } from "@effect/vitest";
 import {
   AttemptId,
+  ApplicationRequest,
   JobAccepted,
   JobRequest,
   RequestId,
-  SyntheticWorkload,
   WorkerId,
   type OrchestratorToWorkerFrame,
   type WorkerToOrchestratorFrame,
@@ -72,12 +72,11 @@ describe("TCP tunnel", () => {
           sentAtEpochMs: Date.now(),
           deadlineEpochMs: Date.now() + 10_000,
           retrySafety: "RetrySafe",
-          workload: SyntheticWorkload.make({
-            firstCpuMs: 0,
-            ioDelayMs: 0,
-            secondCpuMs: 0,
-            responseChunks: 1,
-            delayBetweenChunksMs: 0,
+          request: ApplicationRequest.make({
+            method: "GET",
+            path: "/health",
+            headers: {},
+            body: "",
           }),
         });
 

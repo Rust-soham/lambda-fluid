@@ -21,10 +21,28 @@ importers:
       '@effect/platform-node':
         specifier: 4.0.0-beta.98
         version: 4.0.0-beta.98(effect@4.0.0-beta.98)(ioredis@5.10.1)
+      '@lambda-fluid/aws-runtime':
+        specifier: workspace:*
+        version: link:packages/aws-runtime
+      '@lambda-fluid/benchmark':
+        specifier: workspace:*
+        version: link:packages/benchmark
+      '@lambda-fluid/orchestrator':
+        specifier: workspace:*
+        version: link:packages/orchestrator
+      '@lambda-fluid/protocol':
+        specifier: workspace:*
+        version: link:packages/protocol
+      '@lambda-fluid/worker':
+        specifier: workspace:*
+        version: link:packages/worker
       effect:
         specifier: 4.0.0-beta.98
         version: 4.0.0-beta.98
     devDependencies:
+      '@lambda-fluid/benchmark-cli':
+        specifier: workspace:*
+        version: link:packages/benchmark-cli
       '@types/node':
         specifier: ^25.9.0
         version: 25.9.0
@@ -37,6 +55,34 @@ importers:
       vite-plus:
         specifier: 'catalog:'
         version: 0.2.5(@types/node@25.9.0)(@voidzero-dev/vite-plus-core@0.2.5(@types/node@25.9.0)(yaml@2.9.0))(yaml@2.9.0)
+
+  packages/aws-runtime:
+    dependencies:
+      '@distilled.cloud/aws':
+        specifier: 0.29.1
+        version: 0.29.1(effect@4.0.0-beta.98)
+      '@effect/platform-node':
+        specifier: 4.0.0-beta.98
+        version: 4.0.0-beta.98(effect@4.0.0-beta.98)(ioredis@5.10.1)
+      '@lambda-fluid/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      '@lambda-fluid/worker':
+        specifier: workspace:*
+        version: link:../worker
+      effect:
+        specifier: 4.0.0-beta.98
+        version: 4.0.0-beta.98
+    devDependencies:
+      '@effect/vitest':
+        specifier: 4.0.0-beta.98
+        version: 4.0.0-beta.98(effect@4.0.0-beta.98)(vitest@4.1.10)
+      '@types/node':
+        specifier: ^25.9.0
+        version: 25.9.0
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@25.9.0)(@vitest/browser-preview@4.1.10)(vite@8.1.5(@types/node@25.9.0)(yaml@2.9.0))
 
   packages/benchmark:
     dependencies:
@@ -51,11 +97,45 @@ importers:
         specifier: ^25.9.0
         version: 25.9.0
 
+  packages/benchmark-cli:
+    dependencies:
+      '@effect/platform-node':
+        specifier: 4.0.0-beta.98
+        version: 4.0.0-beta.98(effect@4.0.0-beta.98)(ioredis@5.10.1)
+      '@lambda-fluid/benchmark':
+        specifier: workspace:*
+        version: link:../benchmark
+      '@lambda-fluid/orchestrator':
+        specifier: workspace:*
+        version: link:../orchestrator
+      '@lambda-fluid/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      '@lambda-fluid/worker':
+        specifier: workspace:*
+        version: link:../worker
+      effect:
+        specifier: 4.0.0-beta.98
+        version: 4.0.0-beta.98
+      vite:
+        specifier: npm:@voidzero-dev/vite-plus-core@0.2.5
+        version: '@voidzero-dev/vite-plus-core@0.2.5(@types/node@25.9.0)(yaml@2.9.0)'
+    devDependencies:
+      '@types/node':
+        specifier: ^25.9.0
+        version: 25.9.0
+
   packages/infra:
     dependencies:
       '@effect/platform-node':
         specifier: 4.0.0-beta.98
         version: 4.0.0-beta.98(effect@4.0.0-beta.98)(ioredis@5.10.1)
+      '@lambda-fluid/aws-runtime':
+        specifier: workspace:*
+        version: link:../aws-runtime
+      '@lambda-fluid/benchmark':
+        specifier: workspace:*
+        version: link:../benchmark
       alchemy:
         specifier: 2.0.0-beta.63
         version: 2.0.0-beta.63(@effect/platform-node@4.0.0-beta.98(effect@4.0.0-beta.98)(ioredis@5.10.1))(@types/node@25.9.0)(effect@4.0.0-beta.98)(vite@8.1.5(@types/node@25.9.0)(yaml@2.9.0))(vitest@4.1.10)(workerd@1.20260704.1)(ws@8.21.1)
@@ -72,13 +152,25 @@ importers:
       '@lambda-fluid/protocol':
         specifier: workspace:*
         version: link:../protocol
+      '@lambda-fluid/tunnel':
+        specifier: workspace:*
+        version: link:../tunnel
       effect:
         specifier: 4.0.0-beta.98
         version: 4.0.0-beta.98
     devDependencies:
+      '@effect/platform-node':
+        specifier: 4.0.0-beta.98
+        version: 4.0.0-beta.98(effect@4.0.0-beta.98)(ioredis@5.10.1)
       '@effect/vitest':
         specifier: 4.0.0-beta.98
         version: 4.0.0-beta.98(effect@4.0.0-beta.98)(vitest@4.1.10)
+      '@lambda-fluid/benchmark':
+        specifier: workspace:*
+        version: link:../benchmark
+      '@lambda-fluid/worker':
+        specifier: workspace:*
+        version: link:../worker
       '@types/node':
         specifier: ^25.9.0
         version: 25.9.0
@@ -126,6 +218,9 @@ importers:
       '@lambda-fluid/protocol':
         specifier: workspace:*
         version: link:../protocol
+      '@lambda-fluid/tunnel':
+        specifier: workspace:*
+        version: link:../tunnel
       effect:
         specifier: 4.0.0-beta.98
         version: 4.0.0-beta.98
@@ -2014,10 +2109,6 @@ packages:
     resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
     engines: {node: '>=14.19.0'}
 
-  postcss@8.5.15:
-    resolution: {integrity: sha512-FfR8sjd4em2T6fb3I2MwAJU7HWVMr9zba+enmQeeWFfCbm+UOC/0X4DS8XtpUTMwWMGbjKYP7xjfNekzyGmB3A==}
-    engines: {node: ^10 || ^12 || >=14}
-
   postcss@8.5.19:
     resolution: {integrity: sha512-Mz8SaolMd8nB+G13WkORcxQKHZ/NE4xXevtkJHVuG+guo9/wYKlIMTKAqGdEmYOXR2ijPjTYNHssizdaVSUNdQ==}
     engines: {node: ^10 || ^12 || >=14}
@@ -3438,7 +3529,7 @@ snapshots:
       '@oxc-project/runtime': 0.139.0
       '@oxc-project/types': 0.139.0
       lightningcss: 1.32.0
-      postcss: 8.5.15
+      postcss: 8.5.19
       yuku-codegen: 0.5.48
       yuku-parser: 0.5.48
     optionalDependencies:
@@ -4109,12 +4200,6 @@ snapshots:
   picomatch@4.0.5: {}
 
   pngjs@7.0.0: {}
-
-  postcss@8.5.15:
-    dependencies:
-      nanoid: 3.3.12
-      picocolors: 1.1.1
-      source-map-js: 1.2.1
 
   postcss@8.5.19:
     dependencies:

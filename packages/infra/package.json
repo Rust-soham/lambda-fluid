@@ -8,10 +8,16 @@
     "destroy": "node ./scripts/alchemy-aws.mjs destroy",
     "login": "alchemy login --configure",
     "profile": "alchemy profile show",
-    "plan": "node ./scripts/alchemy-aws.mjs plan"
+    "plan": "node ./scripts/alchemy-aws.mjs plan",
+    "aws-cli": "node ./scripts/alchemy-aws.mjs aws-cli",
+    "bootstrap": "node ./scripts/alchemy-aws.mjs aws bootstrap",
+    "local-aws": "node ./scripts/alchemy-aws.mjs runtime node ../../dist/local-aws/local-aws.js",
+    "demo-local-aws": "node ./scripts/run-example.mjs"
   },
   "dependencies": {
     "@effect/platform-node": "4.0.0-beta.98",
+    "@lambda-fluid/aws-runtime": "workspace:*",
+    "@lambda-fluid/benchmark": "workspace:*",
     "alchemy": "2.0.0-beta.63",
     "effect": "4.0.0-beta.98"
   },

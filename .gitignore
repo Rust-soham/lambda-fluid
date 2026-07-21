@@ -1,5 +1,7 @@
 node_modules
 dist
+dist-benchmark
+dist-bench
 build
 .turbo
 .DS_Store
@@ -8,5 +10,6 @@ coverage
 .env
 .env.*
 **/.alchemy/
+packages/infra/.generated/
 .vscode/.ropeproject
-.repos/effect
+.repos/

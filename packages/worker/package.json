@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@lambda-fluid/protocol": "workspace:*",
+    "@lambda-fluid/tunnel": "workspace:*",
     "effect": "4.0.0-beta.98"
   },
   "devDependencies": {

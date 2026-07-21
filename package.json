@@ -9,6 +9,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "build": "vp build --ssr src/main.ts",
+    "build:bench": "vp build --ssr packages/benchmark-cli/src/cli.ts --outDir packages/benchmark-cli/dist",
     "infra:dev": "vp run @lambda-fluid/infra#dev --",
     "infra:deploy": "vp run @lambda-fluid/infra#deploy --",
     "infra:destroy": "vp run @lambda-fluid/infra#destroy --",
@@ -21,13 +23,23 @@
     "format": "vp fmt",
     "format:check": "vp fmt --check",
     "lint": "vp lint",
-    "lint:fix": "vp lint --fix"
+    "lint:fix": "vp lint --fix",
+    "local": "vp build --ssr src/main.ts && node dist/main.js",
+    "local:aws": "vp build --ssr src/modes/local-aws.ts --outDir dist/local-aws && vp run @lambda-fluid/infra#local-aws --",
+    "demo:local-aws": "vp build --ssr src/modes/demo-local-aws.ts --outDir dist/demo-local-aws && vp run @lambda-fluid/infra#demo-local-aws --",
+    "bench": "vp build --ssr packages/benchmark-cli/src/cli.ts --outDir packages/benchmark-cli/dist && node packages/benchmark-cli/dist/cli.js"
   },
   "dependencies": {
     "@effect/platform-node": "4.0.0-beta.98",
+    "@lambda-fluid/aws-runtime": "workspace:*",
+    "@lambda-fluid/benchmark": "workspace:*",
+    "@lambda-fluid/orchestrator": "workspace:*",
+    "@lambda-fluid/protocol": "workspace:*",
+    "@lambda-fluid/worker": "workspace:*",
     "effect": "4.0.0-beta.98"
   },
   "devDependencies": {
+    "@lambda-fluid/benchmark-cli": "workspace:*",
     "@types/node": "^25.9.0",
     "@voidzero-dev/vite-plus-core": "0.2.5",
     "vite": "catalog:",

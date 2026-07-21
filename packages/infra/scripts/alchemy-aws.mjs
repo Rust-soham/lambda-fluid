@@ -14,6 +14,8 @@ const profileIndex = args.findIndex((arg) => arg === "--profile");
 const profile =
   profileIndex >= 0 && args[profileIndex + 1] ? args[profileIndex + 1] : "default";
 const credentialsPath = join(homedir(), ".alchemy", "credentials", profile, "aws.json");
+const userAwsPath = join(homedir(), ".local", "bin", "aws");
+const awsExecutable = existsSync(userAwsPath) ? userAwsPath : "aws";
 
 if (!existsSync(credentialsPath)) {
   console.error(
@@ -37,23 +39,46 @@ if (credentials.sessionToken) {
 
 if (!env.AWS_ACCOUNT_ID) {
   const identity = spawnSync(
-    "aws",
+    awsExecutable,
     ["sts", "get-caller-identity", "--output", "json"],
     { encoding: "utf8", env }
   );
 
   if (identity.status !== 0) {
     console.error("Failed to resolve AWS account id with stored credentials.");
-    console.error((identity.stderr || identity.stdout).trim());
+    console.error(
+      identity.error?.message ?? (identity.stderr || identity.stdout || "").trim()
+    );
     process.exit(identity.status ?? 1);
   }
 
   env.AWS_ACCOUNT_ID = JSON.parse(identity.stdout).Account;
 }
 
-const alchemy = spawnSync("alchemy", [command, ...args], {
+const awsArgs = args.filter(
+  (arg, index) => arg !== "--" && index !== profileIndex && index !== profileIndex + 1
+);
+const [runtimeExecutable, ...runtimeArgs] = awsArgs;
+const executable =
+  command === "aws-cli"
+    ? awsExecutable
+    : command === "runtime"
+      ? runtimeExecutable
+      : "alchemy";
+const executableArgs =
+  command === "aws-cli"
+    ? awsArgs
+    : command === "runtime"
+      ? runtimeArgs
+      : [command, ...args];
+
+if (!executable) {
+  console.error("The runtime command requires an executable.");
+  process.exit(1);
+}
+const alchemy = spawnSync(executable, executableArgs, {
   stdio: "inherit",
   env,
 });
 
-process.exit(alchemy.status ?? 1);
+process.exit(alchemy.signal === "SIGINT" ? 0 : (alchemy.status ?? 1));

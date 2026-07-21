@@ -9,6 +9,31 @@ export type RetrySafety = typeof RetrySafety.Type;
 export const DrainReason = S.Literals(["ScaleDown", "Shutdown"]);
 export type DrainReason = typeof DrainReason.Type;
 
+export const RequestMethod = S.Literals([
+  "GET",
+  "POST",
+  "PUT",
+  "PATCH",
+  "DELETE",
+  "HEAD",
+  "OPTIONS",
+  "TRACE",
+]);
+export type RequestMethod = typeof RequestMethod.Type;
+
+export const RequestHeaders = S.Record(S.String, S.Array(S.String));
+export type RequestHeaders = typeof RequestHeaders.Type;
+
+/** The application request transported through the worker tunnel. */
+// oxfmt-ignore
+export class ApplicationRequest
+  extends S.Class<ApplicationRequest>("ApplicationRequest")({
+    method: RequestMethod,
+    path: S.NonEmptyString,
+    headers: RequestHeaders,
+    body: S.String,
+}) {}
+
 // oxfmt-ignore
 export class SyntheticWorkload 
   extends S.Class<SyntheticWorkload>("SyntheticWorkload")({
@@ -28,7 +53,7 @@ export class JobRequest
     sentAtEpochMs: NonNegativeInt,
     deadlineEpochMs: NonNegativeInt,
     retrySafety: RetrySafety,
-    workload: SyntheticWorkload,
+    request: ApplicationRequest,
 }) {}
 
 // oxfmt-ignore

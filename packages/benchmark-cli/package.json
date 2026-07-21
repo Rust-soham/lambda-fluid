@@ -1,0 +1,24 @@
+{
+  "name": "@lambda-fluid/benchmark-cli",
+  "private": true,
+  "bin": {
+    "bench": "./dist/cli.js"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "vp build --ssr src/cli.ts --outDir dist",
+    "check": "vp check"
+  },
+  "dependencies": {
+    "@effect/platform-node": "4.0.0-beta.98",
+    "@lambda-fluid/benchmark": "workspace:*",
+    "@lambda-fluid/orchestrator": "workspace:*",
+    "@lambda-fluid/protocol": "workspace:*",
+    "@lambda-fluid/worker": "workspace:*",
+    "effect": "4.0.0-beta.98",
+    "vite": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.0"
+  }
+}

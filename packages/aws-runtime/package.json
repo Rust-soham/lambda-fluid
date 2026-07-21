@@ -1,5 +1,5 @@
 {
-  "name": "@lambda-fluid/orchestrator",
+  "name": "@lambda-fluid/aws-runtime",
   "private": true,
   "type": "module",
   "exports": {
@@ -7,18 +7,17 @@
   },
   "scripts": {
     "check": "vp check",
-    "test": "vp test run packages/orchestrator/test"
+    "test": "vp test run packages/aws-runtime/test --passWithNoTests"
   },
   "dependencies": {
+    "@distilled.cloud/aws": "0.29.1",
+    "@effect/platform-node": "4.0.0-beta.98",
     "@lambda-fluid/protocol": "workspace:*",
-    "@lambda-fluid/tunnel": "workspace:*",
+    "@lambda-fluid/worker": "workspace:*",
     "effect": "4.0.0-beta.98"
   },
   "devDependencies": {
-    "@effect/platform-node": "4.0.0-beta.98",
     "@effect/vitest": "4.0.0-beta.98",
-    "@lambda-fluid/benchmark": "workspace:*",
-    "@lambda-fluid/worker": "workspace:*",
     "@types/node": "^25.9.0",
     "vitest": "catalog:"
   }
